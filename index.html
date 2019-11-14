@@ -1,0 +1,214 @@
+<html>
+
+
+<script src="src/createjs.min.js"></script>
+
+<body onload="init();">
+    <canvas id="main_stage" width="800" height="600"></canvas>
+</body>
+
+<script>
+    var config = {
+        weapons: {
+            laser_gun: {
+                price: 100,
+                damage: 10,
+                range: 3,
+            }
+        },
+        map: {
+            resolution: 25,
+            width: 500,
+            height: 500,
+            padding_x: 50,
+            padding_y: 50,
+        },
+        panel: {
+            width: 100,
+            height: 500,
+        },
+    };
+
+    function grid_to_pixel(grid_x, grid_y) {
+        var px = config.map.padding_x + (grid_x + 0.5) * config.map.resolution
+        var py = config.map.padding_y + (grid_y + 0.5) * config.map.resolution
+        return { x: px, y: py };
+    }
+
+    class Barrier {
+        constructor(x, y) {
+            this.shape = new createjs.Shape();
+            this.shape.graphics.beginFill("rgba(0, 0, 0, 0.9)").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
+            this.shape.x = x;
+            this.shape.y = y;
+        }
+    }
+
+    class LaserGun {
+        constructor(x, y) {
+            this.shape = new createjs.Shape();
+            this.shape.graphics.beginFill("rgba(255, 0, 0, 0.9)").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
+            this.shape.x = x;
+            this.shape.y = y;
+            this.damage = config.weapons.laser_gun.damage;
+            this.range = config.weapons.laser_gun.range;
+        }
+    }
+
+    class Panel {
+        constructor(stage) {
+            this.stage = stage;
+            var vertical_line = new createjs.Shape();
+            this.stage.addChild(vertical_line);
+            vertical_line.graphics.setStrokeStyle(1).beginStroke("rgba(127, 127, 127, 0.5)")
+
+            var start_x = config.map.padding_x + config.map.width + 25;
+            var start_y = config.map.padding_y;
+            vertical_line.graphics.moveTo(start_x, start_y);
+
+            var end_x = start_x;
+            var end_y = config.map.padding_y + config.map.height;
+            vertical_line.graphics.lineTo(end_x, end_y);
+            vertical_line.graphics.endStroke();
+        }
+    }
+
+    class Monster {
+        constructor(start_x, start_y, dest_x, dest_y) {
+            this.start_x = start_x;
+            this.start_y = start_y;
+            this.dest_x = dest_x;
+            this.dest_y = dest_y;
+
+            this.current_x = this.start_x;
+            this.current_y = this.start_y;
+
+            this.path = [];
+
+            this.shape = new createjs.Shape();
+            this.shape.graphics.beginFill("rgba(0, 255, 255, 0.8").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
+
+            var pixel = grid_to_pixel(this.current_x, this.current_y);
+
+            this.shape.x = pixel.x;
+            this.shape.y = pixel.y;
+        }
+
+        move() {
+
+        }
+    }
+
+    class GridMap {
+        constructor(stage) {
+            this.stage = stage;
+
+            this.resolution = config.map.resolution;
+            this.height = config.map.height;
+            this.width = config.map.width;
+
+            this.x_n_grids = this.width / this.resolution;
+            this.y_n_grids = this.height / this.resolution;
+
+            this.grids = []
+            this.barriers = [];
+            this.weapons = []
+
+            this.padding_x = config.map.padding_x;
+            this.padding_y = config.map.padding_y;
+
+            this.initialize_map()
+        }
+
+        initialize_map() {
+            // draw grids
+            for (var row = 0; row < this.y_n_grids + 1; ++row) {
+                var line = new createjs.Shape();
+                this.stage.addChild(line);
+                line.graphics.setStrokeStyle(1).beginStroke("rgba(0, 0, 0, 0.5)")
+
+                var start_x = this.padding_x;
+                var start_y = this.padding_y + this.resolution * row;
+                line.graphics.moveTo(start_x, start_y);
+
+                var end_x = this.padding_x + this.width;
+                var end_y = start_y;
+                line.graphics.lineTo(end_x, end_y);
+                line.graphics.endStroke();
+            }
+            for (var col = 0; col < this.x_n_grids + 1; ++col) {
+                var line = new createjs.Shape();
+                this.stage.addChild(line);
+                line.graphics.setStrokeStyle(1).beginStroke("rgba(0, 0, 0, 0.5)")
+
+                var start_x = this.padding_x + this.resolution * col;
+                var start_y = this.padding_y;
+                line.graphics.moveTo(start_x, start_y);
+
+                var end_x = start_x;
+                var end_y = this.padding_y + this.height;
+                line.graphics.lineTo(end_x, end_y);
+                line.graphics.endStroke();
+            }
+
+            // draw start point
+            var start = new createjs.Shape();
+            start.graphics.beginFill("rgba(127, 127, 127, 0.75)").drawCircle(0, 0, this.resolution * 0.5 - 1);
+            start.x = this.padding_x + this.resolution * 0.5;
+            start.y = this.padding_y + this.resolution * 0.5;
+            this.stage.addChild(start);
+
+            // draw destination point
+            var dest = new createjs.Shape();
+            dest.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, this.resolution * 0.5 - 1);
+            dest.x = this.padding_x + this.width - this.resolution * 0.5;
+            dest.y = this.padding_y + this.height - this.resolution * 0.5;
+            this.stage.addChild(dest);
+        }
+
+        add_barrier(grid_x, grid_y) {
+            var coord = grid_to_pixel(grid_x, grid_y);
+            var barrier = new Barrier(coord.x, coord.y);
+            this.barriers.push(barrier);
+            this.stage.addChild(barrier.shape);
+        }
+
+        add_laser_gun(grid_x, grid_y) {
+            var coord = grid_to_pixel(grid_x, grid_y);
+            var laser_gun = new LaserGun(coord.x, coord.y);
+            this.stage.addChild(laser_gun.shape);
+        }
+
+        is_grid_occupied(x, y) {
+            // TODO:
+            return false;
+        }
+
+        update() {
+            this.stage.update();
+        }
+    }
+
+    function process_inputs() {
+        // TODO: react to user's inputs, like click, move, etc
+    }
+
+    function init() {
+        console.log("Hello World");
+        var stage = new createjs.Stage("main_stage");
+
+        map = new GridMap(stage)
+        map.add_barrier(1, 0);
+        map.add_laser_gun(3, 4);
+
+        var panel = new Panel(stage);
+        var monster = new Monster(0, 1, 9, 9);
+
+        setInterval(function () {
+            process_inputs();
+            map.update();
+        }, 40);
+    }
+</script>
+
+</html>
