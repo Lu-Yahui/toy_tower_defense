@@ -35,21 +35,37 @@
         return { x: px, y: py };
     }
 
+    function pixel_to_grid(px, py) {
+        var gx = (px - config.map.padding_x) / config.map.resolution - 0.5
+        var gy = (py - config.map.padding_y) / config.map.resolution - 0.5
+        return { x: gx, y: gy };
+    }
+
     class Barrier {
-        constructor(x, y) {
+        constructor(gx, gy) {
+            this.gx = gx;
+            this.gy = gy;
+            var pixel = grid_to_pixel(this.gx, this.gy);
+            this.px = pixel.x;
+            this.py = pixel.y;
             this.shape = new createjs.Shape();
             this.shape.graphics.beginFill("rgba(0, 0, 0, 0.9)").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
-            this.shape.x = x;
-            this.shape.y = y;
+            this.shape.x = this.px;
+            this.shape.y = this.py;
         }
     }
 
     class LaserGun {
-        constructor(x, y) {
+        constructor(gx, gy) {
+            this.gx = gx;
+            this.gy = gy;
+            var pixel = grid_to_pixel(this.gx, this.gy);
+            this.px = pixel.x;
+            this.py = pixel.y;
             this.shape = new createjs.Shape();
             this.shape.graphics.beginFill("rgba(255, 0, 0, 0.9)").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
-            this.shape.x = x;
-            this.shape.y = y;
+            this.shape.x = this.px;
+            this.shape.y = this.py;
             this.damage = config.weapons.laser_gun.damage;
             this.range = config.weapons.laser_gun.range;
         }
@@ -74,28 +90,74 @@
     }
 
     class Monster {
-        constructor(start_x, start_y, dest_x, dest_y) {
-            this.start_x = start_x;
-            this.start_y = start_y;
-            this.dest_x = dest_x;
-            this.dest_y = dest_y;
+        constructor(start_gx, start_gy, dest_gx, dest_gy, grid_map) {
+            this.start_gx = start_gx;
+            this.start_gy = start_gy;
 
-            this.current_x = this.start_x;
-            this.current_y = this.start_y;
+            this.dest_gx = dest_gx;
+            this.dest_gy = dest_gy;
 
-            this.path = [];
+            this.grid_map = grid_map;
+
+            this.dest_px = config.map.padding_x + config.map.width + 0.5 * config.map.resolution;
+            this.dest_py = config.map.padding_y + config.map.height + 0.5 * config.map.resolution;
+
+            this.current_gx = this.start_gx;
+            this.current_gy = this.start_gy;
+
+            var pixel = grid_to_pixel(this.current_gx, this.current_gy);
+            this.current_px = pixel.x;
+            this.current_py = pixel.y;
+
+            // pixel/time step
+            this.speed = 2
+            this.path = []
 
             this.shape = new createjs.Shape();
             this.shape.graphics.beginFill("rgba(0, 255, 255, 0.8").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
-
-            var pixel = grid_to_pixel(this.current_x, this.current_y);
-
             this.shape.x = pixel.x;
             this.shape.y = pixel.y;
+
+            this.compute_path()
         }
 
         move() {
+            for (var i = 0; i < this.speed; ++i) {
+                this.path.pop();
+            }
+            var current_dest = this.path.pop();
+            this.shape.x = current_dest.x;
+            this.shape.y = current_dest.y;
+        }
 
+        compute_path() {
+            // monkey path planner
+            // TODO: implement A* or Dijkstra
+            var px = this.dest_px;
+            var py = this.dest_py;
+            while (px != this.current_px || py != this.current_py) {
+                console.log(px, py);
+                if (!this.grid_map.is_grid_occupied(px - 1, py)) {
+                    this.path.push({
+                        x: px - 1,
+                        y: py
+                    });
+                    px = px - 1;
+                    py = py;
+                }
+                else if (!this.grid_map.is_grid_occupied(px, py - 1)) {
+                    this.path.push({
+                        x: px,
+                        y: py - 1
+                    });
+                    px = px;
+                    py = py - 1;
+                }
+                else {
+                    console.error("Can not find a path");
+                    break;
+                }
+            }
         }
     }
 
@@ -111,8 +173,10 @@
             this.y_n_grids = this.height / this.resolution;
 
             this.grids = []
+
             this.barriers = [];
             this.weapons = []
+            this.monsters = []
 
             this.padding_x = config.map.padding_x;
             this.padding_y = config.map.padding_y;
@@ -167,24 +231,48 @@
         }
 
         add_barrier(grid_x, grid_y) {
-            var coord = grid_to_pixel(grid_x, grid_y);
-            var barrier = new Barrier(coord.x, coord.y);
+            var barrier = new Barrier(grid_x, grid_y);
             this.barriers.push(barrier);
             this.stage.addChild(barrier.shape);
         }
 
         add_laser_gun(grid_x, grid_y) {
-            var coord = grid_to_pixel(grid_x, grid_y);
-            var laser_gun = new LaserGun(coord.x, coord.y);
+            var laser_gun = new LaserGun(grid_x, grid_y);
+            this.weapons.push(laser_gun);
             this.stage.addChild(laser_gun.shape);
         }
 
-        is_grid_occupied(x, y) {
-            // TODO:
+        add_monster(grid_x, grid_y) {
+            var monster = new Monster(grid_x, grid_y, this.x_n_grids, this.y_n_grids, this);
+            this.monsters.push(monster);
+            this.stage.addChild(monster.shape);
+        }
+
+        is_grid_occupied(px, py) {
+            var grid = pixel_to_grid(px, py);
+            for (var i = 0; i < this.barriers.length; ++i) {
+                var barrier = this.barriers[i];
+                if (grid.x == barrier.gx && grid.y == barrier.gy) {
+                    return true;
+                }
+            }
+
+            for (var i = 0; i < this.weapons.length; ++i) {
+                var weapon = this.weapons[i];
+                if (grid.x == weapon.gx && grid.y == weapon.gy) {
+                    return true;
+                }
+            }
+
             return false;
         }
 
         update() {
+            for (var i = 0; i < this.monsters.length; ++i) {
+                var monster = this.monsters[i];
+                monster.move();
+            }
+
             this.stage.update();
         }
     }
@@ -200,9 +288,7 @@
         map = new GridMap(stage)
         map.add_barrier(1, 0);
         map.add_laser_gun(3, 4);
-
-        var panel = new Panel(stage);
-        var monster = new Monster(0, 1, 9, 9);
+        map.add_monster(3, 5);
 
         setInterval(function () {
             process_inputs();
