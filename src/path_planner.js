@@ -1,15 +1,13 @@
+
 class AStarPlanner {
-    constructor(start_gx, start_gy, dest_gx, dest_gy, grid_map, h_ratio) {
-        this.start_gx = start_gx;
-        this.start_gy = start_gy;
-        this.dest_gx = dest_gx;
-        this.dest_gy = dest_gy;
+    constructor(grid_map, h_ratio) {
         this.grid_map = grid_map;
+        // f = g_ratio * g + h_ratio * h
         this.h_ratio = h_ratio;
         this.g_ratio = 1.0 - this.h_ratio;
     }
 
-    compute_path() {
+    compute_path(start_px, start_py) {
         var path = [];
         var open_set = [{
             x: this.start_gx,
