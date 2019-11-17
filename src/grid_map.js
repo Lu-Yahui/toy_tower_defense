@@ -6,8 +6,8 @@ class GridMap {
         this.height = config.map.height;
         this.width = config.map.width;
 
-        this.x_n_grids = this.width / this.resolution;
-        this.y_n_grids = this.height / this.resolution;
+        this.x_n_grids = Math.floor(this.width / this.resolution);
+        this.y_n_grids = Math.floor(this.height / this.resolution);
 
         this.grids = []
 
@@ -55,15 +55,17 @@ class GridMap {
         // draw start point
         var start = new createjs.Shape();
         start.graphics.beginFill("rgba(127, 127, 127, 0.75)").drawCircle(0, 0, this.resolution * 0.5 - 1);
-        start.x = this.padding_x + this.resolution * 0.5;
-        start.y = this.padding_y + this.resolution * 0.5;
+        var start_pixel = grid_to_pixel(0, 0);
+        start.x = start_pixel.x;
+        start.y = start_pixel.y;
         this.stage.addChild(start);
 
         // draw destination point
         var dest = new createjs.Shape();
         dest.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, this.resolution * 0.5 - 1);
-        dest.x = this.padding_x + this.width - this.resolution * 0.5;
-        dest.y = this.padding_y + this.height - this.resolution * 0.5;
+        var dest_pixel = grid_to_pixel(this.x_n_grids - 1, this.y_n_grids - 1);
+        dest.x = dest_pixel.x;
+        dest.y = dest_pixel.y;
         this.stage.addChild(dest);
     }
 

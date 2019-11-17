@@ -5,7 +5,7 @@ function grid_to_pixel(grid_x, grid_y) {
 }
 
 function pixel_to_grid(px, py) {
-    var gx = (px - config.map.padding_x) / config.map.resolution - 0.5
-    var gy = (py - config.map.padding_y) / config.map.resolution - 0.5
+    var gx = (px - config.map.padding_x) / config.map.resolution;
+    var gy = (py - config.map.padding_y) / config.map.resolution;
     return { x: Math.floor(gx), y: Math.floor(gy) };
 }
