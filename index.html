@@ -2,6 +2,7 @@
 
 
 <script src="src/createjs.min.js"></script>
+<script src="src/path_planner.js"></script>
 
 <body onload="init();">
     <canvas id="main_stage" width="800" height="600"></canvas>
@@ -32,13 +33,13 @@
     function grid_to_pixel(grid_x, grid_y) {
         var px = config.map.padding_x + (grid_x + 0.5) * config.map.resolution
         var py = config.map.padding_y + (grid_y + 0.5) * config.map.resolution
-        return { x: px, y: py };
+        return { x: Math.floor(px), y: Math.floor(py) };
     }
 
     function pixel_to_grid(px, py) {
         var gx = (px - config.map.padding_x) / config.map.resolution - 0.5
         var gy = (py - config.map.padding_y) / config.map.resolution - 0.5
-        return { x: gx, y: gy };
+        return { x: Math.floor(gx), y: Math.floor(gy) };
     }
 
     class Barrier {
@@ -99,8 +100,8 @@
 
             this.grid_map = grid_map;
 
-            this.dest_px = config.map.padding_x + config.map.width + 0.5 * config.map.resolution;
-            this.dest_py = config.map.padding_y + config.map.height + 0.5 * config.map.resolution;
+            this.dest_px = Math.floor(config.map.padding_x + config.map.width + 0.5 * config.map.resolution);
+            this.dest_py = Math.floor(config.map.padding_y + config.map.height + 0.5 * config.map.resolution);
 
             this.current_gx = this.start_gx;
             this.current_gy = this.start_gy;
@@ -110,7 +111,8 @@
             this.current_py = pixel.y;
 
             // pixel/time step
-            this.speed = 2
+            this.speed = 0.5
+            this.displacement = 0.0
             this.path = []
 
             this.shape = new createjs.Shape();
@@ -122,42 +124,26 @@
         }
 
         move() {
-            for (var i = 0; i < this.speed; ++i) {
+            this.displacement += this.speed;
+
+            if (this.displacement < 1.0) {
+                return;
+            }
+
+            for (var i = 0; i < this.displacement; ++i) {
                 this.path.pop();
             }
+            this.displacement = 0.0;
+
             var current_dest = this.path.pop();
+            if (current_dest == undefined) {
+                return;
+            }
             this.shape.x = current_dest.x;
             this.shape.y = current_dest.y;
         }
 
         compute_path() {
-            // monkey path planner
-            // TODO: implement A* or Dijkstra
-            var px = this.dest_px;
-            var py = this.dest_py;
-            while (px != this.current_px || py != this.current_py) {
-                console.log(px, py);
-                if (!this.grid_map.is_grid_occupied(px - 1, py)) {
-                    this.path.push({
-                        x: px - 1,
-                        y: py
-                    });
-                    px = px - 1;
-                    py = py;
-                }
-                else if (!this.grid_map.is_grid_occupied(px, py - 1)) {
-                    this.path.push({
-                        x: px,
-                        y: py - 1
-                    });
-                    px = px;
-                    py = py - 1;
-                }
-                else {
-                    console.error("Can not find a path");
-                    break;
-                }
-            }
         }
     }
 
@@ -243,7 +229,7 @@
         }
 
         add_monster(grid_x, grid_y) {
-            var monster = new Monster(grid_x, grid_y, this.x_n_grids, this.y_n_grids, this);
+            var monster = new Monster(grid_x, grid_y, this.x_n_grids - 1, this.y_n_grids - 1, this);
             this.monsters.push(monster);
             this.stage.addChild(monster.shape);
         }
