@@ -3,7 +3,7 @@ var config = {
         laser_gun: {
             price: 100,
             damage: 10,
-            range: 3,
+            range: 5,
         }
     },
     map: {

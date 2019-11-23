@@ -20,9 +20,10 @@ class Monster {
         this.current_py = pixel.y;
 
         // pixel/time step
-        this.speed = 3;
-        this.displacement = 0.0;
-        this.path = [];
+        this.speed = 0.5
+        this.displacement = 0.0
+        this.life = 100
+        this.path = []
 
         this.shape = new createjs.Shape();
         this.shape.graphics.beginFill("rgba(0, 255, 255, 0.8").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
@@ -57,6 +58,9 @@ class Monster {
         }
         this.shape.x = current_dest.x;
         this.shape.y = current_dest.y;
+
+        this.current_px = this.current_px;
+        this.current_py = this.current_py;
     }
 
     compute_path(start_px, start_py, end_px, end_py) {
