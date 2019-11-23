@@ -74,9 +74,11 @@ function make_test_scenario(map) {
     map.add_barrier(17, 12);
     map.add_barrier(19, 15);
 
-    map.add_monster(0, 0, 7);
-    map.add_monster(0, 0, 6);
-    map.add_monster(0, 0, 5);
-    map.add_monster(0, 0, 4);
+    // map.add_monster(0, 0, 7);
+    // map.add_monster(0, 0, 6);
+    // map.add_monster(0, 0, 5);
+    // map.add_monster(0, 0, 4);
     map.add_monster(0, 0, 3);
+
+    map.add_laser_gun(6, 6);
 }
