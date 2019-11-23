@@ -1,7 +1,6 @@
 <html>
 
 <script src="src/createjs.min.js"></script>
-<script src="src/path_planner.js"></script>
 <script src="src/grid_map.js"></script>
 <script src="src/config.js"></script>
 <script src="src/monster.js"></script>
@@ -9,6 +8,8 @@
 <script src="src/weapon.js"></script>
 <script src="src/utils.js"></script>
 <script src="src/panel.js"></script>
+<script src="src/a_star.js"></script>
+<script src="src/scenario_generator.js"></script>
 
 <body onload="init();">
     <canvas id="main_stage" width="800" height="600"></canvas>
@@ -24,9 +25,7 @@
         var stage = new createjs.Stage("main_stage");
 
         map = new GridMap(stage)
-        map.add_barrier(1, 0);
-        map.add_laser_gun(3, 4);
-        map.add_monster(3, 5);
+        make_test_scenario(map);
 
         setInterval(function () {
             process_inputs();

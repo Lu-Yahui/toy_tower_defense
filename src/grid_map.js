@@ -1,3 +1,5 @@
+"use strict";
+
 class GridMap {
     constructor(stage) {
         this.stage = stage;
@@ -6,10 +8,11 @@ class GridMap {
         this.height = config.map.height;
         this.width = config.map.width;
 
-        this.x_n_grids = Math.floor(this.width / this.resolution);
-        this.y_n_grids = Math.floor(this.height / this.resolution);
+        this.grid_rows = Math.floor(this.height / this.resolution);
+        this.grid_cols = Math.floor(this.width / this.resolution);
 
-        this.grids = []
+        this.grids = [];
+        this.occupied_grids = [];
 
         this.barriers = [];
         this.weapons = []
@@ -23,7 +26,7 @@ class GridMap {
 
     initialize_map() {
         // draw grids
-        for (var row = 0; row < this.y_n_grids + 1; ++row) {
+        for (var row = 0; row < this.grid_rows + 1; ++row) {
             var line = new createjs.Shape();
             this.stage.addChild(line);
             line.graphics.setStrokeStyle(1).beginStroke("rgba(0, 0, 0, 0.5)")
@@ -37,7 +40,7 @@ class GridMap {
             line.graphics.lineTo(end_x, end_y);
             line.graphics.endStroke();
         }
-        for (var col = 0; col < this.x_n_grids + 1; ++col) {
+        for (var col = 0; col < this.grid_cols + 1; ++col) {
             var line = new createjs.Shape();
             this.stage.addChild(line);
             line.graphics.setStrokeStyle(1).beginStroke("rgba(0, 0, 0, 0.5)")
@@ -63,7 +66,7 @@ class GridMap {
         // draw destination point
         var dest = new createjs.Shape();
         dest.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, this.resolution * 0.5 - 1);
-        var dest_pixel = grid_to_pixel(this.x_n_grids - 1, this.y_n_grids - 1);
+        var dest_pixel = grid_to_pixel(this.grid_cols - 1, this.grid_rows - 1);
         dest.x = dest_pixel.x;
         dest.y = dest_pixel.y;
         this.stage.addChild(dest);
@@ -73,37 +76,33 @@ class GridMap {
         var barrier = new Barrier(grid_x, grid_y);
         this.barriers.push(barrier);
         this.stage.addChild(barrier.shape);
+
+        this.occupied_grids.push(this.linearize_grid_index(grid_x, grid_y));
     }
 
     add_laser_gun(grid_x, grid_y) {
         var laser_gun = new LaserGun(grid_x, grid_y);
         this.weapons.push(laser_gun);
         this.stage.addChild(laser_gun.shape);
+
+        this.occupied_grids.push(this.linearize_grid_index(grid_x, grid_y));
     }
 
-    add_monster(grid_x, grid_y) {
-        var monster = new Monster(grid_x, grid_y, this.x_n_grids - 1, this.y_n_grids - 1, this);
+    add_monster(grid_x, grid_y, speed = 1) {
+        var monster = new Monster(grid_x, grid_y, this.grid_cols - 1, this.grid_rows - 1, this);
+        monster.set_speed(speed);
         this.monsters.push(monster);
         this.stage.addChild(monster.shape);
     }
 
-    is_grid_occupied(px, py) {
-        var grid = pixel_to_grid(px, py);
-        for (var i = 0; i < this.barriers.length; ++i) {
-            var barrier = this.barriers[i];
-            if (grid.x == barrier.gx && grid.y == barrier.gy) {
-                return true;
-            }
-        }
+    is_grid_occupied(gx, gy) {
+        var grid_index = this.linearize_grid_index(gx, gy);
+        var found_index = this.occupied_grids.indexOf(grid_index);
+        return found_index !== -1;
+    }
 
-        for (var i = 0; i < this.weapons.length; ++i) {
-            var weapon = this.weapons[i];
-            if (grid.x == weapon.gx && grid.y == weapon.gy) {
-                return true;
-            }
-        }
-
-        return false;
+    linearize_grid_index(gx, gy) {
+        return this.grid_cols * gy + gx;
     }
 
     update() {
