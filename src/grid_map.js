@@ -81,7 +81,7 @@ class GridMap {
     }
 
     add_laser_gun(grid_x, grid_y) {
-        var laser_gun = new LaserGun(grid_x, grid_y);
+        var laser_gun = new LaserGun(grid_x, grid_y, this);
         this.weapons.push(laser_gun);
         this.stage.addChild(laser_gun.shape);
 
@@ -101,20 +101,6 @@ class GridMap {
         return found_index !== -1;
     }
 
-    draw_laser([weapon_x, weapon_y, monster_x, monster_y]) {
-        var line = new createjs.Shape();
-        this.stage.addChild(line);
-        line.graphics.setStrokeStyle(1).beginStroke("rgba(0, 0, 0, 0.5)")
-
-        line.graphics.moveTo(monster_x, monster_y);
-        line.graphics.lineTo(weapon_x, weapon_y);
-        line.graphics.endStroke();
-    }
-
-    remove_monster(monster) {
-        this.monsters.push(monster);
-    }
-
     linearize_grid_index(gx, gy) {
         return this.grid_cols * gy + gx;
     }
@@ -126,18 +112,13 @@ class GridMap {
                 this.monsters.splice(i, 1)
                 this.stage.removeChild(monster.shape);
             }
-            monster.move();
+            else {
+                monster.move();
+            }
         }
 
         for (var i = 0; i < this.weapons.length; ++i) {
-            var weapon = this.weapons[i];
-            if (weapon.hit(this.monsters) == 0) {
-                continue;
-            }
-            else {
-                this.draw_laser(weapon.hit(this.monsters));
-            }
-
+            this.weapons[i].hit(this.monsters);
         }
 
         this.stage.update();

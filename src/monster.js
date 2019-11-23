@@ -1,5 +1,6 @@
 class Monster {
     constructor(start_gx, start_gy, dest_gx, dest_gy, grid_map) {
+        this.id = IdGenerator.get_monster_id();
         this.start_gx = start_gx;
         this.start_gy = start_gy;
 
@@ -7,6 +8,8 @@ class Monster {
         this.dest_gy = dest_gy;
 
         this.grid_map = grid_map;
+        this.arrived = false;
+        this.dead = false;
 
         var dest_pixel = grid_to_pixel(this.grid_map.grid_cols - 1, this.grid_map.grid_rows - 1);
         this.dest_px = dest_pixel.x;
@@ -40,6 +43,8 @@ class Monster {
             return;
         }
 
+        this.update_status();
+
         this.displacement += this.speed;
 
         if (this.displacement < 1.0) {
@@ -59,8 +64,8 @@ class Monster {
         this.shape.x = current_dest.x;
         this.shape.y = current_dest.y;
 
-        this.current_px = this.current_px;
-        this.current_py = this.current_py;
+        this.current_px = current_dest.x;
+        this.current_py = current_dest.y;
     }
 
     compute_path(start_px, start_py, end_px, end_py) {
@@ -72,6 +77,12 @@ class Monster {
     }
 
     trigger_arrived_event() {
+        this.arrived = true;
         this.grid_map.stage.removeChild(this.shape);
+    }
+
+    update_status() {
+        this.shape.scaleX = this.life / 100.0 + 0.05;
+        this.shape.scaleY = this.life / 100.0 + 0.05;
     }
 }
