@@ -22,6 +22,9 @@ class GridMap {
         this.padding_y = config.map.padding_y;
 
         this.initialize_map()
+
+        this.path_finder = new PathFinder(this);
+        this.player = new Player(100, 500);
     }
 
     initialize_map() {
@@ -73,19 +76,47 @@ class GridMap {
     }
 
     add_barrier(grid_x, grid_y) {
+        if (this.is_grid_occupied(grid_x, grid_y)) {
+            return false;
+        }
+
         var barrier = new Barrier(grid_x, grid_y);
         this.barriers.push(barrier);
+        this.occupied_grids.push(this.linearize_grid_index(grid_x, grid_y));
+
+        if (!this.path_finder.is_path_existing()) {
+            this.barriers.pop();
+            this.occupied_grids.pop();
+            return false;
+        }
+
+        this.trigger_monsters_recompute_path();
+
         this.stage.addChild(barrier.shape);
 
-        this.occupied_grids.push(this.linearize_grid_index(grid_x, grid_y));
+        return true;
     }
 
     add_laser_gun(grid_x, grid_y) {
+        if (this.is_grid_occupied(grid_x, grid_y)) {
+            return false;
+        }
+
         var laser_gun = new LaserGun(grid_x, grid_y, this);
         this.weapons.push(laser_gun);
+        this.occupied_grids.push(this.linearize_grid_index(grid_x, grid_y));
+
+        if (!this.path_finder.is_path_existing()) {
+            this.weapons.pop();
+            this.occupied_grids.pop();
+            return false;
+        }
+
+        this.trigger_monsters_recompute_path();
+
         this.stage.addChild(laser_gun.shape);
 
-        this.occupied_grids.push(this.linearize_grid_index(grid_x, grid_y));
+        return true;
     }
 
     add_monster(grid_x, grid_y, speed = 1) {
@@ -105,7 +136,20 @@ class GridMap {
         return this.grid_cols * gy + gx;
     }
 
+    trigger_monsters_recompute_path() {
+        for (var i = 0; i < this.monsters.length; ++i) {
+            this.monsters[i].recompute_path();
+        }
+    }
+
     update() {
+        this.update_monsters();
+        this.update_weapons();
+        this.update_player_info();
+        this.update_stage();
+    }
+
+    update_monsters() {
         for (var i = 0; i < this.monsters.length; ++i) {
             var monster = this.monsters[i];
             if (monster.life <= 0) {
@@ -116,11 +160,21 @@ class GridMap {
                 monster.move();
             }
         }
+    }
 
+    update_weapons() {
         for (var i = 0; i < this.weapons.length; ++i) {
             this.weapons[i].hit(this.monsters);
         }
+    }
 
+    update_stage() {
         this.stage.update();
+    }
+
+    update_player_info() {
+        // TODO: update player info here, e.g. life, money, etc.
+        console.log(`Player life: ${this.player.life}.`);
+        console.log(`Player money: ${this.player.money}.`);
     }
 }

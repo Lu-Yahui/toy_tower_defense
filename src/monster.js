@@ -23,10 +23,11 @@ class Monster {
         this.current_py = pixel.y;
 
         // pixel/time step
-        this.speed = 0.5
-        this.displacement = 0.0
-        this.life = 100
-        this.path = []
+        this.speed = 0.5;
+        this.displacement = 0.0;
+        this.life = 100;
+        this.damage = 5;
+        this.path = [];
 
         this.shape = new createjs.Shape();
         this.shape.graphics.beginFill("rgba(0, 255, 255, 0.8").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
@@ -72,6 +73,10 @@ class Monster {
         this.path = this.path_planner.search_path(start_px, start_py, end_px, end_py);
     }
 
+    recompute_path() {
+        this.path = this.path_planner.search_path(this.current_px, this.current_py, this.end_px, this.end_py);
+    }
+
     set_speed(speed) {
         this.speed = speed;
     }
@@ -79,6 +84,7 @@ class Monster {
     trigger_arrived_event() {
         this.arrived = true;
         this.grid_map.stage.removeChild(this.shape);
+        this.grid_map.player.life -= this.damage;
     }
 
     update_status() {
