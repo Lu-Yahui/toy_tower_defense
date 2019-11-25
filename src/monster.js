@@ -1,5 +1,5 @@
 class Monster {
-    constructor(start_gx, start_gy, dest_gx, dest_gy, grid_map) {
+    constructor(start_gx, start_gy, dest_gx, dest_gy, grid_map, appearance = "rgba(0, 255, 255, 0.8)") {
         this.id = IdGenerator.get_monster_id();
         this.start_gx = start_gx;
         this.start_gy = start_gy;
@@ -31,7 +31,7 @@ class Monster {
         this.path = [];
 
         this.shape = new createjs.Shape();
-        this.shape.graphics.beginFill("rgba(0, 255, 255, 0.8").drawCircle(0, 0, config.map.resolution * 0.5 - 1);
+        this.shape.graphics.beginFill(appearance).drawCircle(0, 0, config.map.resolution * 0.5 - 1);
         this.shape.x = pixel.x;
         this.shape.y = pixel.y;
 

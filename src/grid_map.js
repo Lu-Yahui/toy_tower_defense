@@ -119,9 +119,25 @@ class GridMap {
         return true;
     }
 
-    add_monster(grid_x, grid_y, speed = 1) {
-        var monster = new Monster(grid_x, grid_y, this.grid_cols - 1, this.grid_rows - 1, this);
-        monster.set_speed(speed);
+    add_monster(monster_type) {
+        var monster = null;
+        if (monster_type === "knight") {
+            monster = create_knight(this);
+        }
+        else if (monster_type === "footman") {
+            monster = create_footman(this);
+        }
+        else if (monster_type === "swordsman") {
+            monster = create_swordsman(this);
+        }
+        else if (monster_type === "assassin") {
+            monster = create_assassin(this);
+        }
+        else {
+            console.error("not supported");
+            return;
+        }
+
         this.monsters.push(monster);
         this.stage.addChild(monster.shape);
     }
