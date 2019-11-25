@@ -152,13 +152,22 @@ class GridMap {
     update_monsters() {
         for (var i = 0; i < this.monsters.length; ++i) {
             var monster = this.monsters[i];
+
+            if (monster.arrived) {
+                this.player.life -= monster.damage;
+                this.monsters.splice(i, 1);
+                this.stage.removeChild(monster.shape);
+                continue;
+            }
+
             if (monster.life <= 0) {
+                this.player.money += monster.bonus;
                 this.monsters.splice(i, 1)
                 this.stage.removeChild(monster.shape);
+                continue;
             }
-            else {
-                monster.move();
-            }
+
+            monster.move();
         }
     }
 
@@ -176,5 +185,9 @@ class GridMap {
         // TODO: update player info here, e.g. life, money, etc.
         console.log(`Player life: ${this.player.life}.`);
         console.log(`Player money: ${this.player.money}.`);
+
+        if (this.player.life <= 0) {
+            console.log("Game Over.");
+        }
     }
 }

@@ -27,6 +27,7 @@ class Monster {
         this.displacement = 0.0;
         this.life = 100;
         this.damage = 5;
+        this.bonus = 5;
         this.path = [];
 
         this.shape = new createjs.Shape();
@@ -40,7 +41,7 @@ class Monster {
 
     move() {
         if (this.path.length === 0) {
-            this.trigger_arrived_event();
+            this.set_arrived();
             return;
         }
 
@@ -59,7 +60,7 @@ class Monster {
 
         var current_dest = this.path.shift();
         if (current_dest == undefined) {
-            this.trigger_arrived_event();
+            this.set_arrived();
             return;
         }
         this.shape.x = current_dest.x;
@@ -81,10 +82,8 @@ class Monster {
         this.speed = speed;
     }
 
-    trigger_arrived_event() {
+    set_arrived() {
         this.arrived = true;
-        this.grid_map.stage.removeChild(this.shape);
-        this.grid_map.player.life -= this.damage;
     }
 
     update_status() {

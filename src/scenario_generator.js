@@ -78,8 +78,8 @@ function make_test_scenario(map) {
     map.add_laser_gun(7, 6);
     map.add_laser_gun(9, 9);
 
-    map.add_monster(0, 0, 1);
-    map.add_monster(0, 0, 0.5);
-    map.add_monster(0, 0, 0.3);
-    map.add_monster(0, 0, 0.2);
+    map.add_monster(0, 0, 5.5);
+    map.add_monster(0, 0, 2.8);
+    map.add_monster(0, 0, 1.0);
+    map.add_monster(0, 0, 30.0);
 }

@@ -2,7 +2,7 @@ var config = {
     weapons: {
         laser_gun: {
             price: 100,
-            damage: 0.05,
+            damage: 1.0,
             range: 5,
         }
     },
