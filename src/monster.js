@@ -53,10 +53,11 @@ class Monster {
             return;
         }
 
-        for (var i = 0; i < this.displacement; ++i) {
+        var pixel_displacement;
+        for (pixel_displacement = 0; pixel_displacement < this.displacement; ++pixel_displacement) {
             this.path.shift();
         }
-        this.displacement = 0.0;
+        this.displacement -= pixel_displacement;
 
         var current_dest = this.path.shift();
         if (current_dest == undefined) {

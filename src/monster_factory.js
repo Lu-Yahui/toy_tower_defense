@@ -3,7 +3,7 @@
 function create_knight(grid_map) {
     var appearance = "rgba(127, 127, 255, 0.8)";
     var knight = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
-    knight.speed = 3.0;
+    knight.speed = 1.75;
     knight.damage = 5.0;
     knight.bonus = 10.0;
     knight.life = 150.0;
@@ -36,7 +36,7 @@ function create_swordsman(grid_map) {
 function create_assassin(grid_map) {
     var appearance = "rgba(255, 0, 64, 0.8)";
     var assassin = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
-    assassin.speed = 4.0;
+    assassin.speed = 2.0;
     assassin.damage = 10.0;
     assassin.bonus = 20.0;
     assassin.life = 75.0;
