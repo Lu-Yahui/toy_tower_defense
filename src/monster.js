@@ -29,6 +29,7 @@ class Monster {
         this.damage = 5;
         this.bonus = 5;
         this.path = [];
+        this.type = "default";
 
         this.shape = new createjs.Shape();
         this.shape.graphics.beginFill(appearance).drawCircle(0, 0, config.map.resolution * 0.5 - 1);

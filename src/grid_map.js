@@ -119,7 +119,7 @@ class GridMap {
         return true;
     }
 
-    add_monster(monster_type) {
+    add_monster_by_type(monster_type) {
         var monster = null;
         if (monster_type === "knight") {
             monster = create_knight(this);
@@ -138,6 +138,11 @@ class GridMap {
             return;
         }
 
+        this.monsters.push(monster);
+        this.stage.addChild(monster.shape);
+    }
+
+    add_monster(monster) {
         this.monsters.push(monster);
         this.stage.addChild(monster.shape);
     }

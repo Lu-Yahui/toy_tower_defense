@@ -28,11 +28,15 @@
         console.log("Hello World");
         var stage = new createjs.Stage("main_stage");
 
-        map = new GridMap(stage)
+        var map = new GridMap(stage)
+        var monster_factor = new MonsterFactory(map);
         make_test_scenario(map);
 
         setInterval(function () {
             process_inputs();
+            if (map.monsters.length === 0) {
+                monster_factor.produce();
+            }
             map.update();
         }, 40);
     }
