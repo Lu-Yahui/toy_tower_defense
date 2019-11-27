@@ -77,6 +77,7 @@ function make_test_scenario(map) {
     map.add_laser_gun(6, 6);
     map.add_laser_gun(7, 6);
     map.add_laser_gun(9, 9);
+    map.add_laser_gun(15, 16);
 
     // map.add_monster_by_type("knight");
     // map.add_monster_by_type("footman");

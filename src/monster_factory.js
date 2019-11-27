@@ -1,7 +1,7 @@
 "use strict";
 
 function create_knight(grid_map) {
-    var appearance = "rgba(16, 8, 240, 0.8)";
+    var appearance = "rgba(220, 8, 40, 0.8)";
     var knight = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
     knight.speed = 1.75;
     knight.damage = 5.0;
@@ -37,7 +37,7 @@ function create_swordsman(grid_map) {
 }
 
 function create_assassin(grid_map) {
-    var appearance = "rgba(64, 0, 64, 0.8)";
+    var appearance = "rgba(255, 0, 32, 0.8)";
     var assassin = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
     assassin.speed = 2.0;
     assassin.damage = 10.0;
