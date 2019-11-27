@@ -1,7 +1,7 @@
 "use strict";
 
 function create_knight(grid_map) {
-    var appearance = "rgba(127, 127, 255, 0.8)";
+    var appearance = "rgba(16, 8, 240, 0.8)";
     var knight = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
     knight.speed = 1.75;
     knight.damage = 5.0;
@@ -13,7 +13,7 @@ function create_knight(grid_map) {
 }
 
 function create_footman(grid_map) {
-    var appearance = "rgba(127, 0, 255, 0.8)";
+    var appearance = "rgba(127, 192, 64, 0.8)";
     var footman = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
     footman.speed = 1.0;
     footman.damage = 2.0;
@@ -25,7 +25,7 @@ function create_footman(grid_map) {
 }
 
 function create_swordsman(grid_map) {
-    var appearance = "rgba(127, 64, 127, 0.8)";
+    var appearance = "rgba(192, 16, 64, 0.8)";
     var swordsman = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
     swordsman.speed = 1.5;
     swordsman.damage = 3.5;
@@ -37,7 +37,7 @@ function create_swordsman(grid_map) {
 }
 
 function create_assassin(grid_map) {
-    var appearance = "rgba(255, 0, 64, 0.8)";
+    var appearance = "rgba(64, 0, 64, 0.8)";
     var assassin = new Monster(0, 0, grid_map.grid_cols - 1, grid_map.grid_rows - 1, grid_map, appearance);
     assassin.speed = 2.0;
     assassin.damage = 10.0;
@@ -56,47 +56,52 @@ class MonsterFactory {
         this.max_num_knight = 6;
         this.max_num_assassin = 5;
 
-        this.round = 1;
+        this.round = 0;
         this.speed_random_range = 0.25;
+
+        this.num_footman = 0;
+        this.num_swordsman = 0;
+        this.num_knight = 0;
+        this.num_assassin = 0;
     }
 
     produce() {
-        var num_footman = Math.floor(Math.sqrt(this.round)) + 1;
-        num_footman = Math.min(num_footman, this.max_num_footman);
+        this.num_footman = Math.floor(Math.sqrt(this.round)) + 1;
+        this.num_footman = Math.min(this.num_footman, this.max_num_footman);
 
-        var num_swordsman = Math.floor(Math.sqrt(this.round - 1)) + 1;
-        num_swordsman = Math.min(num_swordsman, this.max_num_swordsman);
+        this.num_swordsman = Math.floor(Math.sqrt(this.round - 1)) + 1;
+        this.num_swordsman = Math.min(this.num_swordsman, this.max_num_swordsman);
 
-        var num_knight = Math.floor(Math.sqrt((this.round - 1) * 0.75));
-        num_knight = Math.min(num_knight, this.max_num_knight);
+        this.num_knight = Math.floor(Math.sqrt((this.round - 1) * 0.75));
+        this.num_knight = Math.min(this.num_knight, this.max_num_knight);
 
-        var num_assassin = 0;
+        this.num_assassin = 0;
         if (this.round > 5) {
-            num_assassin = Math.floor(Math.sqrt((this.round - 5) * 0.75));
+            this.num_assassin = Math.floor(Math.sqrt((this.round - 5) * 0.75));
         }
-        num_assassin = Math.min(num_assassin, this.max_num_assassin);
+        this.num_assassin = Math.min(this.num_assassin, this.max_num_assassin);
 
         ++this.round;
 
-        for (var i = 0; i < num_footman; ++i) {
+        for (var i = 0; i < this.num_footman; ++i) {
             var footman = create_footman(this.grid_map);
             this.randomize_speed(footman);
             this.grid_map.add_monster(footman);
         }
 
-        for (var i = 0; i < num_swordsman; ++i) {
+        for (var i = 0; i < this.num_swordsman; ++i) {
             var swordsman = create_swordsman(this.grid_map);
             this.randomize_speed(swordsman);
             this.grid_map.add_monster(swordsman);
         }
 
-        for (var i = 0; i < num_knight; ++i) {
+        for (var i = 0; i < this.num_knight; ++i) {
             var knight = create_swordsman(this.grid_map);
             this.randomize_speed(knight);
             this.grid_map.add_monster(knight);
         }
 
-        for (var i = 0; i < num_assassin; ++i) {
+        for (var i = 0; i < this.num_assassin; ++i) {
             var assassin = create_swordsman(this.grid_map);
             this.randomize_speed(assassin);
             this.grid_map.add_monster(assassin);
@@ -108,6 +113,4 @@ class MonsterFactory {
         var factor = Math.pow(-1, sign) * Math.random() * this.speed_random_range;
         monster.speed *= (1.0 + factor);
     }
-
-
 }

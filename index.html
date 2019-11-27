@@ -16,7 +16,7 @@
 <script src="src/monster_factory.js"></script>
 
 <body onload="init();">
-    <canvas id="main_stage" width="800" height="600"></canvas>
+    <canvas id="main_stage" width="850" height="600"></canvas>
 </body>
 
 <script>
@@ -28,15 +28,27 @@
         console.log("Hello World");
         var stage = new createjs.Stage("main_stage");
 
-        var map = new GridMap(stage)
+        var panel = new Panel(stage);
+        var map = new GridMap(stage);
         var monster_factor = new MonsterFactory(map);
         make_test_scenario(map);
 
-        setInterval(function () {
+        var main_loop = setInterval(function () {
             process_inputs();
+
             if (map.monsters.length === 0) {
                 monster_factor.produce();
             }
+
+            panel.update_round_info(monster_factor.round);
+            panel.update_monster_info(
+                monster_factor.num_footman,
+                monster_factor.num_swordsman,
+                monster_factor.num_knight,
+                monster_factor.num_assassin
+            );
+            panel.update_player_info(map.player.life, map.player.money);
+
             map.update();
         }, 40);
     }

@@ -166,7 +166,6 @@ class GridMap {
     update() {
         this.update_monsters();
         this.update_weapons();
-        this.update_player_info();
         this.update_stage();
     }
 
@@ -200,15 +199,5 @@ class GridMap {
 
     update_stage() {
         this.stage.update();
-    }
-
-    update_player_info() {
-        // TODO: update player info here, e.g. life, money, etc.
-        console.log(`Player life: ${this.player.life}.`);
-        console.log(`Player money: ${this.player.money}.`);
-
-        if (this.player.life <= 0) {
-            console.log("Game Over.");
-        }
     }
 }
